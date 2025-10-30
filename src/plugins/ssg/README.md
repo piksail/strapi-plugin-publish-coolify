@@ -1,0 +1,3 @@
+# ssg
+
+Go full SSG
