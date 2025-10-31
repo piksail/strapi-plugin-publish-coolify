@@ -10,4 +10,3 @@ TODO:
 - [ ] Pusblish to npm
 - [ ] UI
   - [ ] Toast?
-  - [ ] Alignement button

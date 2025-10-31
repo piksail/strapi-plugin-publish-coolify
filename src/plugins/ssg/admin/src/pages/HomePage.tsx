@@ -1,9 +1,8 @@
-import { Main } from '@strapi/design-system';
-import { useIntl } from 'react-intl';
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useIntl } from 'react-intl';
+import { Main } from '@strapi/design-system';
+import { Rocket } from '@strapi/icons';
 import { useFetchClient } from '@strapi/strapi/admin';
-
-import { getTranslation } from '../utils/getTranslation';
 import {
   Box,
   Button,
@@ -16,20 +15,12 @@ import {
   Th,
   Flex,
 } from '@strapi/design-system';
+import { formatDate } from '../utils/date';
+import { getTranslation } from '../utils/getTranslation';
+import { Deployment, GetDeploymentsResponse } from '../types';
+import { getDeploymentStatusColor } from '../utils/getDeploymentStatusColor';
 
-interface Deployment {
-  id: number;
-  deployment_uuid: string;
-  status: string;
-  commit: string;
-  commit_message: string;
-  created_at: string;
-  finished_at: string;
-  updated_at: string;
-  is_webhook: boolean;
-  is_api: boolean;
-  application_name: string;
-}
+const POLL_INTERVAL_MS = 30_000; // 30 seconds; adjust if needed
 
 const HomePage = () => {
   const { formatMessage } = useIntl();
@@ -46,23 +37,13 @@ const HomePage = () => {
 
   // Use a ref to store interval id so we can clear it from callbacks
   const pollingRef = useRef<number | null>(null);
-  const POLL_INTERVAL_MS = 30_000; // 30 seconds; adjust if needed
-
+  
   const fetchDeployments = useCallback(async () => {
-    // mark loading and fetch
     setIsLoadingDeployments(true);
     try {
-      const response = await get('/ssg/deployments');
-
-      // Handle the response structure: { count: number, deployments: array }
-      const data = response.data;
-      if (data && Array.isArray(data.deployments)) {
-        setDeployments(data.deployments);
-      } else if (Array.isArray(data)) {
-        setDeployments(data);
-      } else {
-        setDeployments([]);
-      }
+      const response = await get<GetDeploymentsResponse>('/ssg/deployments');
+      const {data} = response;
+      setDeployments(data.deployments ?? [])
     } catch (error) {
       console.error('Failed to fetch deployments:', error);
       setDeployments([]);
@@ -145,19 +126,9 @@ const HomePage = () => {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('fr-FR', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    });
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status?.toLowerCase()) {
+  // TODO just because file rename broke somehow 
+  const getStatusColor = (status: Deployment["status"]) => {
+    switch (status) {
       case 'finished':
         return 'success600';
       case 'failed':
@@ -185,30 +156,33 @@ const HomePage = () => {
   return (
     <Main>
       <Box padding={8}>
-        <Typography variant="alpha" marginBottom={4}>
-          {formatMessage({ id: getTranslation('page.title') })}
-        </Typography>
-        <Button
-          marginLeft={2}
-          onClick={onClick}
-          loading={isLoading}
-          disabled={isLoading}
-          title={
-            isLoading
+        <Flex justifyContent={{initial: "space-between"}} gap={16}>
+          <Typography variant="alpha" tag="h1">
+            {formatMessage({ id: getTranslation('page.title') })}
+          </Typography>
+          <Button
+            startIcon={<Rocket />}
+            size="L"
+            onClick={onClick}
+            loading={isLoading}
+            disabled={isLoading}
+            title={
+              isLoading
+                ? formatMessage({ id: getTranslation('button.publishing') })
+                : formatMessage({ id: getTranslation('button.publishInfo') })
+            }
+          >
+            {isLoading
               ? formatMessage({ id: getTranslation('button.publishing') })
-              : formatMessage({ id: getTranslation('button.publishInfo') })
-          }
-        >
-          {isLoading
-            ? formatMessage({ id: getTranslation('button.publishing') })
-            : formatMessage({ id: getTranslation('button.publish') })}
-        </Button>
+              : formatMessage({ id: getTranslation('button.publish') })}
+          </Button>
+        </Flex>
         <br />
         {/* <Typography variant="beta" marginBottom={2}>
           Plugin {formatMessage({ id: getTranslation('plugin.name') })}
         </Typography> */}
         <br />
-        <Typography marginBottom={4}>
+        <Typography variant="delta" tag="p" textColor="neutral600">
           {formatMessage({ id: getTranslation('page.description') })}
         </Typography>
         <br />
@@ -225,13 +199,13 @@ const HomePage = () => {
         <Box marginTop={8}>
           <Flex justifyContent="space-between" alignItems="center" marginBottom={4}>
             <Flex direction="column" alignItems="flex-start">
-              <Typography variant="beta">
+              <Typography variant="beta" tag="h2">
                 {formatMessage({ id: getTranslation('deployments.title') })}
               </Typography>
               {lastRefreshTime && (
-                <Typography variant="pi" textColor="neutral600">
+                <Typography variant="sigma" textColor="neutral600">
                   {formatMessage({ id: getTranslation('deployments.lastRefresh') })} :{' '}
-                  {formatDate(lastRefreshTime.toISOString())} (
+                  {formatDate(new Date(lastRefreshTime.toISOString()))} (
                   {formatMessage({ id: getTranslation('deployments.everyRefresh') })}{' '}
                   {POLL_INTERVAL_MS / 1000}s)
                 </Typography>
@@ -283,25 +257,24 @@ const HomePage = () => {
                   </Td>
                 </Tr>
               ) : (
-                Array.isArray(deployments) &&
                 deployments.map((deployment) => (
                   <Tr key={deployment.id}>
                     <Td>
-                      <Typography textColor={getStatusColor(deployment.status)}>
+                      <Typography textColor={getDeploymentStatusColor(deployment.status)}>
                         {getStatusLabel(deployment.status)}
                       </Typography>
                     </Td>
                     <Td>
-                      <Typography>{formatDate(deployment.created_at)}</Typography>
+                      <Typography>{formatDate(new Date(deployment.created_at))}</Typography>
                     </Td>
                     <Td>
-                      <Typography>{formatDate(deployment.finished_at)}</Typography>
+                      <Typography>{formatDate(new Date(deployment.finished_at))} ({deployment.finished_at && (new Date(deployment.finished_at).getUTCMilliseconds() - new Date(deployment.created_at).getUTCMilliseconds())})</Typography>
                     </Td>
                     <Td>
                       <Typography>
                         {deployment.is_webhook
                           ? '🔗 ' +
-                            formatMessage({ id: getTranslation('deployments.source.webhook') })
+                            formatMessage({ id: getTranslation('deployments.source.webhook') }) + " (Piksail)"
                           : deployment.is_api
                             ? '⚡ ' +
                               formatMessage({ id: getTranslation('deployments.source.api') })
