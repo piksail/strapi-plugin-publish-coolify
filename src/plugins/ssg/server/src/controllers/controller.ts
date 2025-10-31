@@ -25,6 +25,26 @@ const controller = ({ strapi }: { strapi: Core.Strapi }) => ({
       ctx.status = 500;
     }
   },
+
+  async listDeployments(ctx) {
+    try {
+      const skip = parseInt(ctx.query.skip as string) || 0;
+      const take = parseInt(ctx.query.take as string) || 10;
+
+      const deployments = await strapi.plugin('ssg').service('service').listDeployments(skip, take);
+
+      ctx.body = deployments;
+      ctx.status = 200;
+    } catch (err) {
+      strapi.log.error('List deployments controller error:', err);
+      ctx.body = {
+        success: false,
+        error: 'Failed to fetch deployments',
+        details: err instanceof Error ? err.message : 'Unknown error',
+      };
+      ctx.status = 500;
+    }
+  },
 });
 
 export default controller;
