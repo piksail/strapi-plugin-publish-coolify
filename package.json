@@ -1,8 +1,23 @@
 {
-  "name": "strapi-plugin-ssg",
-  "version": "0.1.0",
-  "private": true,
-  "description": "A Strapi application",
+  "name": "@piksail/strapi-plugin-publish-coolify",
+  "description": "Strapi plugin to publish your content to Coolify",
+  "license": "MIT",
+  "author": {
+    "name": "Piksail",
+    "email": "dev@piksail.fr",
+    "url": "https://piksail.fr"
+  },
+  "maintainers": [
+    {
+      "name": "Piksail",
+      "email": "dev@piksail.fr",
+      "url": "https://piksail.fr"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/piksail/strapi-plugin-publish-coolify.git"
+  },
   "scripts": {
     "build": "strapi build",
     "console": "strapi console",
