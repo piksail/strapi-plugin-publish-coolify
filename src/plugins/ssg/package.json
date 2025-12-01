@@ -58,12 +58,27 @@
   },
   "strapi": {
     "kind": "plugin",
-    "name": "ssg",
-    "displayName": "SSG",
-    "description": "Go full SSG"
+    "name": "publish-coolify",
+    "displayName": "Coolify",
+    "description": "Strapi plugin to publish your content to Coolify"
   },
-  "name": "ssg",
-  "description": "Go full SSG",
+  "name": "@piksail/strapi-plugin-publish-coolify",
+  "description": "Strapi plugin to publish your content to Coolify",
   "license": "MIT",
-  "author": "Benjent <benjent@hotmail.fr>"
-}
+  "author": {
+    "name": "Piksail",
+    "email": "dev@piksail.fr",
+    "url": "https://piksail.fr"
+  },
+  "maintainers": [
+    {
+      "name": "Piksail",
+      "email": "dev@piksail.fr",
+      "url": "https://piksail.fr"
+    }
+  ],
+    "repository": {
+    "type": "git",
+    "url": "git://github.com/piksail/strapi-plugin-publish-coolify.git"
+  },
+  }
