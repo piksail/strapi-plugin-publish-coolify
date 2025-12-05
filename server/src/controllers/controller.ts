@@ -3,7 +3,7 @@ import type { Core } from '@strapi/strapi';
 const controller = ({ strapi }: { strapi: Core.Strapi }) => ({
   index(ctx) {
     ctx.body = strapi
-      .plugin('ssg')
+      .plugin('publish-coolify')
       // the name of the service file & the method.
       .service('service')
       .getWelcomeMessage();
@@ -11,7 +11,7 @@ const controller = ({ strapi }: { strapi: Core.Strapi }) => ({
 
   async deploy(ctx) {
     try {
-      const result = await strapi.plugin('ssg').service('service').triggerDeploy();
+      const result = await strapi.plugin('publish-coolify').service('service').triggerDeploy();
 
       ctx.body = result;
       ctx.status = 200;
@@ -31,7 +31,7 @@ const controller = ({ strapi }: { strapi: Core.Strapi }) => ({
       const skip = parseInt(ctx.query.skip as string) || 0;
       const take = parseInt(ctx.query.take as string) || 10;
 
-      const deployments = await strapi.plugin('ssg').service('service').listDeployments(skip, take);
+      const deployments = await strapi.plugin('publish-coolify').service('service').listDeployments(skip, take);
 
       ctx.body = deployments;
       ctx.status = 200;

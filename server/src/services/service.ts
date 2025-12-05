@@ -49,10 +49,10 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
   async triggerDeploy() {
     const pluginStore = strapi.store({
       type: 'plugin',
-      name: 'ssg',
+      name: 'publish-coolify',
     });
 
-    const config = strapi.config.get('plugin::ssg') as SsgConfig;
+    const config = strapi.config.get('plugin::publish-coolify') as SsgConfig;
 
     if (!config.coolifyToken) {
       throw new Error(
@@ -89,7 +89,7 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
   },
 
   async listDeployments(skip: number = 0, take: number = 10) {
-    const config = strapi.config.get('plugin::ssg') as SsgConfig;
+    const config = strapi.config.get('plugin::publish-coolify') as SsgConfig;
     const { coolifyApiUrl, coolifyAppUuid, coolifyToken } = config;
 
     if (!coolifyApiUrl || !coolifyAppUuid || !coolifyToken) {

@@ -1,0 +1,48 @@
+# Source files
+admin/src/
+server/src/
+*.ts
+!*.d.ts
+
+# Config files
+tsconfig*.json
+.editorconfig
+.eslintignore
+.eslintrc
+.prettierignore
+.prettierrc
+
+# Development files
+.env*
+.git/
+.github/
+.gitignore
+.nvmrc
+
+# Build artifacts
+*.log
+*.tsbuildinfo
+.eslintcache
+
+# Testing
+coverage/
+*.test.*
+*.spec.*
+
+# Documentation (keep README)
+# docs/
+
+# Node modules
+node_modules/
+
+# Lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Misc
+.DS_Store
+*.swp
+*.swo
+.idea/
+.vscode/

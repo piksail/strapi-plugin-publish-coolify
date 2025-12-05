@@ -5,7 +5,7 @@ A Strapi plugin that integrates with [Coolify](https://coolify.io/) to trigger d
 ## Installation
 
 ```bash
-pnpm add strapi-plugin-publish-coolify
+pnpm add @piksail/strapi-plugin-publish-coolify
 ```
 
 ## Configuration
