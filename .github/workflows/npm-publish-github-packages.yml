@@ -27,6 +27,8 @@ jobs:
         env:
           TAG_NAME: ${{ github.event.release.tag_name }}
         run: npm version ${TAG_NAME} --no-git-tag-version
+      - name: Build
+        run: npm run build && npm run verify
       - name: Publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
