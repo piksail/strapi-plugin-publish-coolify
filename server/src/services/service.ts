@@ -1,5 +1,5 @@
-import type { Core } from '@strapi/strapi';
-import { log } from 'console';
+import type { Core } from "@strapi/strapi";
+import { log } from "console";
 
 interface SsgConfig {
   coolifyToken?: string;
@@ -7,7 +7,7 @@ interface SsgConfig {
   coolifyAppUuid?: string;
 }
 
-interface Deployment {
+export interface Deployment {
   id: number;
   application_id: string;
   deployment_uuid: string;
@@ -36,74 +36,76 @@ interface Deployment {
   horizon_job_worker: string;
 }
 
-interface DeploymentsResponse {
+export interface DeploymentsResponse {
   count: number;
   deployments: Deployment[];
 }
 
 const service = ({ strapi }: { strapi: Core.Strapi }) => ({
   getWelcomeMessage() {
-    return 'Welcome to Strapi 🚀';
+    return "Welcome to Strapi 🚀";
   },
 
   async triggerDeploy() {
     const pluginStore = strapi.store({
-      type: 'plugin',
-      name: 'publish-coolify',
+      type: "plugin",
+      name: "publish-coolify",
     });
 
-    const config = strapi.config.get('plugin::publish-coolify') as SsgConfig;
+    const config = strapi.config.get("plugin::publish-coolify") as SsgConfig;
 
     if (!config.coolifyToken) {
       throw new Error(
-        'Coolify token is not configured. Please set SSG_COOLIFY_TOKEN environment variable.'
+        "Coolify token is not configured. Please set SSG_COOLIFY_TOKEN environment variable."
       );
     }
     const deploymentUrl = `${config.coolifyApiUrl}/deploy?uuid=${config.coolifyAppUuid}&force=false`;
 
     try {
       const response = await fetch(deploymentUrl, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: 'Bearer ' + config.coolifyToken,
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + config.coolifyToken,
         },
       });
 
       if (!response.ok) {
-        throw new Error(`Webhook request failed with status ${response.status}`);
+        throw new Error(
+          `Webhook request failed with status ${response.status}`
+        );
       }
 
       const result = await response.text();
 
       return {
         success: true,
-        message: 'Deploy triggered successfully',
+        message: "Deploy triggered successfully",
         timestamp: new Date().toISOString(),
         response: result,
       };
     } catch (error) {
-      strapi.log.error('Failed to trigger deploy webhook:', error);
+      strapi.log.error("Failed to trigger deploy webhook:", error);
       throw error;
     }
   },
 
   async listDeployments(skip: number = 0, take: number = 10) {
-    const config = strapi.config.get('plugin::publish-coolify') as SsgConfig;
+    const config = strapi.config.get("plugin::publish-coolify") as SsgConfig;
     const { coolifyApiUrl, coolifyAppUuid, coolifyToken } = config;
 
     if (!coolifyApiUrl || !coolifyAppUuid || !coolifyToken) {
       throw new Error(
-        'Coolify settings not configured. Please set COOLIFY_API_URL, COOLIFY_APP_UUID, and COOLIFY_TOKEN environment variables.'
+        "Coolify settings not configured. Please set COOLIFY_API_URL, COOLIFY_APP_UUID, and COOLIFY_TOKEN environment variables."
       );
     }
 
     try {
       const url = `${coolifyApiUrl}/deployments/applications/${coolifyAppUuid}?skip=${skip}&take=${take}`;
       const response = await fetch(url, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${coolifyToken}`,
         },
       });
@@ -122,7 +124,8 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
             const datePattern = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
             if (datePattern.test(deployment.finished_at)) {
               // Convert "2025-10-31 11:06:08" to "2025-10-31T11:06:08.000000Z"
-              deployment.finished_at = deployment.finished_at.replace(' ', 'T') + '.000000Z';
+              deployment.finished_at =
+                deployment.finished_at.replace(" ", "T") + ".000000Z";
             }
           }
           return deployment;
@@ -131,7 +134,7 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
 
       return data;
     } catch (error) {
-      strapi.log.error('Failed to fetch deployments:', error);
+      strapi.log.error("Failed to fetch deployments:", error);
       throw error;
     }
   },

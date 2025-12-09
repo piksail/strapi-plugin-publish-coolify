@@ -1,5 +1,10 @@
-import controller from './controller';
+import type { Core } from "@strapi/strapi";
+import controller from "./controller";
 
-export default {
+const controllers: {
+  controller: typeof controller;
+} = {
   controller,
 };
+
+export default controllers;

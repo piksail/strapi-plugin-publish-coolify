@@ -1,5 +1,10 @@
-import service from './service';
+import type { Core } from "@strapi/strapi";
+import service from "./service";
 
-export default {
+const services: {
+  service: typeof service;
+} = {
   service,
 };
+
+export default services;
