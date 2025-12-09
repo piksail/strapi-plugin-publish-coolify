@@ -1,9 +1,9 @@
 export default [
   {
-    method: 'GET',
-    path: '/',
+    method: "GET",
+    path: "/",
     // name of the controller file & the method.
-    handler: 'controller.index',
+    handler: "controller.index",
     config: {
       policies: [],
     },

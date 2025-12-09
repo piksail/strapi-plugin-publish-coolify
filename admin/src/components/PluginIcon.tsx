@@ -1,4 +1,4 @@
-import { Rocket } from '@strapi/icons';
+import { Rocket } from "@strapi/icons";
 
 const PluginIcon = () => <Rocket />;
 

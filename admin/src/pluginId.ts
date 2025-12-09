@@ -1,1 +1,1 @@
-export const PLUGIN_ID = 'publish-coolify';
+export const PLUGIN_ID = "publish-coolify";
