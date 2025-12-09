@@ -58,9 +58,6 @@
     "test:ts:front": "tsc -p admin/tsconfig.json",
     "test:ts:back": "tsc -p server/tsconfig.json"
   },
-  "dependencies": {
-    "@piksail/strapi-plugin-publish-coolify": "link:.yalc/@piksail/strapi-plugin-publish-coolify"
-  },
   "devDependencies": {
     "@strapi/sdk-plugin": "^5.3.2",
     "@strapi/strapi": "^5.31.3",
