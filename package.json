@@ -1,6 +1,6 @@
 {
   "name": "@piksail/strapi-plugin-publish-coolify",
-  "version": "0.0.2",
+  "version": "0.1.1",
   "description": "Strapi plugin to publish your content to Coolify",
   "keywords": [
     "strapi",
