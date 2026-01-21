@@ -22,6 +22,25 @@ import { getDeploymentStatusColor } from "../utils/getDeploymentStatusColor";
 
 const POLL_INTERVAL_MS = 30_000; // 30 seconds; adjust if needed
 
+const getErrorMessageForStatus = (status?: number) => {
+  switch (status) {
+    case 401:
+      return "Unauthorized - Invalid or missing Coolify API token";
+    case 403:
+      return "Forbidden - Insufficient permissions";
+    case 404:
+      return "Not Found - Application or endpoint not found";
+    case 500:
+      return "Internal Server Error - Coolify API error";
+    case 502:
+      return "Bad Gateway - Coolify API unavailable";
+    case 503:
+      return "Service Unavailable - Coolify is down";
+    default:
+      return status ? `HTTP Error ${status}` : "Network error";
+  }
+};
+
 const HomePage = () => {
   const { formatMessage } = useIntl();
   const { post, get } = useFetchClient();
@@ -30,6 +49,10 @@ const HomePage = () => {
   const [deployments, setDeployments] = useState<Deployment[]>([]);
   const [isLoadingDeployments, setIsLoadingDeployments] = useState(true);
   const [lastRefreshTime, setLastRefreshTime] = useState<Date | null>(null);
+  const [deploymentsError, setDeploymentsError] = useState<{
+    status?: number;
+    message?: string;
+  } | null>(null);
 
   useEffect(() => {
     fetchDeployments();
@@ -42,17 +65,47 @@ const HomePage = () => {
     setIsLoadingDeployments(true);
     try {
       const response = await get<GetDeploymentsResponse>(
-        "/publish-coolify/deployments"
+        "/publish-coolify/deployments",
       );
       const { data } = response;
       setDeployments(data.deployments ?? []);
+      setDeploymentsError(null); // Clear error on success
     } catch (error) {
       console.error("Failed to request deployments:", error);
       // Show user-friendly error for debugging
       if (error && typeof error === "object" && "response" in error) {
         const err = error as any;
-        console.error("Response status:", err.response?.status);
+        console.error("Response status: ", err.response?.status);
         console.error("Response data:", err.response?.data);
+
+        // Extract the actual error message from the response
+        let errorMessage =
+          err.response?.data?.details ||
+          err.response?.data?.error ||
+          err.response?.data?.message;
+
+        // If details contains a JSON string with a message, extract it
+        if (
+          errorMessage &&
+          typeof errorMessage === "string" &&
+          errorMessage.includes('"message"')
+        ) {
+          try {
+            const parsed = JSON.parse(errorMessage);
+            errorMessage = parsed.message || errorMessage;
+          } catch {
+            // If parsing fails, use the original string
+          }
+        }
+
+        setDeploymentsError({
+          status: err.response?.status,
+          message: errorMessage || err.message || "Unknown error",
+        });
+      } else {
+        setDeploymentsError({
+          message: error instanceof Error ? error.message : "Unknown error",
+        });
       }
       setDeployments([]);
     } finally {
@@ -111,7 +164,7 @@ const HomePage = () => {
       if (response.data.success) {
         setMessage(
           "✅ " +
-            formatMessage({ id: getTranslation("message.deploy.success") })
+            formatMessage({ id: getTranslation("message.deploy.success") }),
         );
         // Refresh deployments list after triggering deploy
         setTimeout(() => fetchDeployments(), 2000);
@@ -121,7 +174,7 @@ const HomePage = () => {
             formatMessage({ id: getTranslation("message.deploy.error") }) +
             ": " +
             (response.data.details ||
-              formatMessage({ id: getTranslation("message.deploy.failed") }))
+              formatMessage({ id: getTranslation("message.deploy.failed") })),
         );
       }
     } catch (error) {
@@ -130,7 +183,7 @@ const HomePage = () => {
         "❌ " +
           formatMessage({ id: getTranslation("message.deploy.error") }) +
           ": " +
-          formatMessage({ id: getTranslation("message.deploy.unable") })
+          formatMessage({ id: getTranslation("message.deploy.unable") }),
       );
     } finally {
       setIsLoading(false);
@@ -218,7 +271,7 @@ const HomePage = () => {
                 {formatMessage({ id: getTranslation("deployments.title") })}
               </Typography>
               {lastRefreshTime && (
-                <Typography variant="sigma" textColor="neutral600">
+                <Typography style={{ marginTop: "8px" }} textColor="neutral600">
                   {formatMessage({
                     id: getTranslation("deployments.lastRefresh"),
                   })}{" "}
@@ -278,10 +331,29 @@ const HomePage = () => {
               {deployments.length === 0 && !isLoadingDeployments ? (
                 <Tr>
                   <Td colSpan={4}>
-                    <Typography>
-                      {formatMessage({
-                        id: getTranslation("deployments.empty"),
-                      })}
+                    <Typography
+                      textColor={deploymentsError ? "danger600" : "neutral600"}
+                    >
+                      {deploymentsError ? (
+                        <div>
+                          {formatMessage({
+                            id: getTranslation("deployments.error"),
+                          })}
+                          {" - "}
+                          {getErrorMessageForStatus(deploymentsError.status)}
+                          {deploymentsError.message && (
+                            <div
+                              style={{ marginTop: "8px", fontSize: "0.9em" }}
+                            >
+                              {deploymentsError.message}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        formatMessage({
+                          id: getTranslation("deployments.empty"),
+                        })
+                      )}
                     </Typography>
                   </Td>
                 </Tr>
@@ -302,15 +374,20 @@ const HomePage = () => {
                     </Td>
                     <Td>
                       <Typography>
-                        {formatDate(new Date(deployment.finished_at))} (
-                        {deployment.finished_at &&
-                          new Date(
-                            deployment.finished_at
-                          ).getUTCMilliseconds() -
-                            new Date(
-                              deployment.created_at
-                            ).getUTCMilliseconds()}
-                        )
+                        {deployment.finished_at ? (
+                          <>
+                            {formatDate(new Date(deployment.finished_at))}
+                            {" ("}
+                            {Math.round(
+                              (new Date(deployment.finished_at).getTime() -
+                                new Date(deployment.created_at).getTime()) /
+                                1000,
+                            )}
+                            s)
+                          </>
+                        ) : (
+                          "-"
+                        )}
                       </Typography>
                     </Td>
                     <Td>

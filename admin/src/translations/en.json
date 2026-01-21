@@ -22,6 +22,7 @@
   "publish-coolify.deployments.source.webhook": "Webhook",
   "publish-coolify.deployments.source.api": "API",
   "publish-coolify.deployments.source.manual": "Manual",
+  "publish-coolify.deployments.error": "Error",
   "publish-coolify.deployment.status.queued": "Queued",
   "publish-coolify.deployment.status.in_progress": "In Progress",
   "publish-coolify.deployment.status.finished": "Finished",

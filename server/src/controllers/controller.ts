@@ -18,14 +18,15 @@ const controller = ({ strapi }: { strapi: Core.Strapi }) => ({
 
       ctx.body = result;
       ctx.status = 200;
-    } catch (err) {
+    } catch (err: any) {
       strapi.log.error("Deploy controller error:", err);
       ctx.body = {
         success: false,
         error: "Failed to trigger deploy",
         details: err instanceof Error ? err.message : "Unknown error",
       };
-      ctx.status = 500;
+      // Preserve the original HTTP status if available, otherwise default to 500
+      ctx.status = err.status || 500;
     }
   },
 
@@ -41,14 +42,15 @@ const controller = ({ strapi }: { strapi: Core.Strapi }) => ({
 
       ctx.body = deployments;
       ctx.status = 200;
-    } catch (err) {
+    } catch (err: any) {
       strapi.log.error("List deployments controller error:", err);
       ctx.body = {
         success: false,
         error: "Failed to fetch deployments",
         details: err instanceof Error ? err.message : "Unknown error",
       };
-      ctx.status = 500;
+      // Preserve the original HTTP status if available, otherwise default to 500
+      ctx.status = err.status || 500;
     }
   },
 });

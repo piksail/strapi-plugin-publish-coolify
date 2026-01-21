@@ -1,6 +1,15 @@
 import type { Core } from "@strapi/strapi";
 import { log } from "console";
 
+class HttpError extends Error {
+  status: number;
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "HttpError";
+    this.status = status;
+  }
+}
+
 interface SsgConfig {
   coolifyToken?: string;
   coolifyApiUrl?: string;
@@ -56,7 +65,7 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
 
     if (!config.coolifyToken) {
       throw new Error(
-        "Coolify token is not configured. Please set SSG_COOLIFY_TOKEN environment variable."
+        "Coolify token is not configured. Please set SSG_COOLIFY_TOKEN environment variable.",
       );
     }
     const deploymentUrl = `${config.coolifyApiUrl}/deploy?uuid=${config.coolifyAppUuid}&force=false`;
@@ -71,8 +80,10 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
       });
 
       if (!response.ok) {
-        throw new Error(
-          `Webhook request failed with status ${response.status}`
+        const errorText = await response.text().catch(() => "Unknown error");
+        throw new HttpError(
+          `Webhook request failed: ${errorText || response.statusText}`,
+          response.status,
         );
       }
 
@@ -96,7 +107,7 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
 
     if (!coolifyApiUrl || !coolifyAppUuid || !coolifyToken) {
       throw new Error(
-        "Coolify settings not configured. Please set COOLIFY_API_URL, COOLIFY_APP_UUID, and COOLIFY_TOKEN environment variables."
+        "Coolify settings not configured. Please set COOLIFY_API_URL, COOLIFY_APP_UUID, and COOLIFY_TOKEN environment variables.",
       );
     }
 
@@ -111,7 +122,11 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch deployments: ${response.status}`);
+        const errorText = await response.text().catch(() => "Unknown error");
+        throw new HttpError(
+          `Failed to fetch deployments: ${errorText || response.statusText}`,
+          response.status,
+        );
       }
 
       const data = (await response.json()) as DeploymentsResponse;
