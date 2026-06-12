@@ -15,17 +15,16 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version-file: package.json
-          cache-dependency-path: package-lock.json
-          registry-url: "https://registry.npmjs.org/"
+          node-version: "22"
+          package-manager-cache: false
       - name: Dump versions
         run: |
           echo "Node version: $(node -v)"
           echo "npm version: $(npm --version)"
           echo "Git version: $(git --version)"
-      - run: npm install --frozen-lockfile
+      - run: npm ci
       - name: Set version
         env:
           TAG_NAME: ${{ github.event.release.tag_name }}
@@ -34,4 +33,4 @@ jobs:
         run: npm run build && npm run verify
       - name: Publish
         run: |
-          npm publish --provenance --access=public
+          npm publish --access=public
