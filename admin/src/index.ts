@@ -6,16 +6,14 @@ import { PluginIcon } from "./components/PluginIcon";
 export default {
   register(app: any) {
     app.addMenuLink({
-      to: `/plugins/${PLUGIN_ID}`,
+      to: `plugins/${PLUGIN_ID}`,
       icon: PluginIcon,
       intlLabel: {
         id: `${PLUGIN_ID}.plugin.name`,
         defaultMessage: "Coolify Publisher",
       },
-      Component: async () => {
-        const { App } = await import("./pages/App");
-        return App;
-      },
+      Component: () =>
+        import("./pages/App").then((mod) => ({ default: mod.App })),
       permissions: [],
     });
 
@@ -39,7 +37,7 @@ export default {
         } catch {
           return { data: {}, locale };
         }
-      })
+      }),
     );
   },
 };
