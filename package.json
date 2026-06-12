@@ -61,7 +61,6 @@
   "devDependencies": {
     "@strapi/sdk-plugin": "^5.3.2",
     "@strapi/strapi": "^5.48.0",
-    "@strapi/admin": "^5.48.0",
     "@strapi/typescript-utils": "^5.48.0",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
@@ -73,9 +72,7 @@
     "typescript": "^5.9.3"
   },
   "peerDependencies": {
-    "@strapi/sdk-plugin": "^5.3.2",
     "@strapi/strapi": "^5.48.0",
-    "@strapi/admin": "^5.48.0",
     "@strapi/design-system": "*",
     "@strapi/icons": "*",
     "react": "^18.3.1",
