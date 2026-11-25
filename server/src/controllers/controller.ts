@@ -18,15 +18,26 @@ const controller = ({ strapi }: { strapi: Core.Strapi }) => ({
 
       ctx.body = result;
       ctx.status = 200;
-    } catch (err: any) {
-      strapi.log.error("Deploy controller error:", err);
+    } catch (err) {
+      strapi.log.error(
+        `Deploy controller error: ${err instanceof Error ? err.stack || err.message : String(err)}`,
+      );
+      const status =
+        err instanceof Error &&
+        "status" in err &&
+        typeof err.status === "number"
+          ? err.status
+          : 500;
+      const message = err instanceof Error ? err.message : "Unknown error";
       ctx.body = {
         success: false,
-        error: "Failed to trigger deploy",
-        details: err instanceof Error ? err.message : "Unknown error",
+        error: {
+          status,
+          name: "DeploymentError",
+          message,
+        },
       };
-      // Preserve the original HTTP status if available, otherwise default to 500
-      ctx.status = err.status || 500;
+      ctx.status = status;
     }
   },
 

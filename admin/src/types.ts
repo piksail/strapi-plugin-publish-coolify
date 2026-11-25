@@ -14,7 +14,6 @@ export type Deployment = {
   is_webhook: boolean;
   created_at: string;
   updated_at: string;
-  logs: string;
   current_process_id: string;
   restart_only: boolean;
   restarted_at: string;

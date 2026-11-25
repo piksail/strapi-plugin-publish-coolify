@@ -21,6 +21,16 @@ COOLIFY_API_URL=https://your-coolify-instance.com/api/v1
 COOLIFY_APP_UUID=your_application_uuid
 ```
 
+The plugin queues deployments with [`POST /api/v1/deploy`](https://coolify.io/docs/api/endpoints/deployments/deploy-by-tag-or-uuid)
+and reports request errors in Strapi's admin panel and server logs. Once queued,
+Strapi polls [`GET /api/v1/deployments/{uuid}`](https://coolify.io/docs/api/endpoints/deployments/get-deployment-by-uuid)
+in the background and forwards new, non-hidden build output to its server logs.
+This runs until a terminal deployment status, Strapi shutdown, or one hour.
+The Coolify token needs `deploy` and `read`, plus `read:sensitive` access to
+the application on Coolify versions that restrict access to deployment
+logs. Restrict access to Strapi logs: visible build output may still contain
+sensitive information printed by the build itself.
+
 ## Development
 
 ```bash
