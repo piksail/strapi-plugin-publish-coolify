@@ -4,6 +4,8 @@ A Strapi plugin that integrates with [Coolify](https://coolify.io/) to trigger d
 
 ## Installation
 
+The plugin requires Node.js 22 or newer.
+
 ```bash
 pnpm add @piksail/strapi-plugin-publish-coolify
 ```
@@ -32,6 +34,9 @@ logs. Restrict access to Strapi logs: visible build output may still contain
 sensitive information printed by the build itself.
 
 ## Development
+
+Local development and the release workflow use the Node.js 24 version pinned
+in [`.nvmrc`](.nvmrc). Run `nvm use` before building locally if you use nvm.
 
 ```bash
 # Change version in package.json to "dev" or any other tag you want to use for local development
