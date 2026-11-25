@@ -19,7 +19,9 @@ const controller = ({ strapi }: { strapi: Core.Strapi }) => ({
       ctx.body = result;
       ctx.status = 200;
     } catch (err: any) {
-      strapi.log.error("Deploy controller error:", err);
+      strapi.log.error(
+        `Deploy controller error: ${err instanceof Error ? err.stack || err.message : String(err)}`,
+      );
       ctx.body = {
         success: false,
         error: "Failed to trigger deploy",

@@ -1,5 +1,4 @@
 import type { Core } from "@strapi/strapi";
-import { log } from "console";
 
 class HttpError extends Error {
   status: number;
@@ -56,49 +55,39 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
   },
 
   async triggerDeploy() {
-    const pluginStore = strapi.store({
-      type: "plugin",
-      name: "publish-coolify",
-    });
-
     const config = strapi.config.get("plugin::publish-coolify") as SsgConfig;
 
     if (!config.coolifyToken) {
       throw new Error(
-        "Coolify token is not configured. Please set SSG_COOLIFY_TOKEN environment variable.",
+        "Coolify token is not configured. Please set COOLIFY_TOKEN environment variable.",
       );
     }
     const deploymentUrl = `${config.coolifyApiUrl}/deploy?uuid=${config.coolifyAppUuid}&force=false`;
 
-    try {
-      const response = await fetch(deploymentUrl, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + config.coolifyToken,
-        },
-      });
+    const response = await fetch(deploymentUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + config.coolifyToken,
+      },
+    });
 
-      if (!response.ok) {
-        const errorText = await response.text().catch(() => "Unknown error");
-        throw new HttpError(
-          `Webhook request failed: ${errorText || response.statusText}`,
-          response.status,
-        );
-      }
-
-      const result = await response.text();
-
-      return {
-        success: true,
-        message: "Deploy triggered successfully",
-        timestamp: new Date().toISOString(),
-        response: result,
-      };
-    } catch (error) {
-      strapi.log.error("Failed to trigger deploy webhook:", error);
-      throw error;
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => "Unknown error");
+      throw new HttpError(
+        `Webhook request failed: ${errorText || response.statusText}`,
+        response.status,
+      );
     }
+
+    const result = await response.text();
+
+    return {
+      success: true,
+      message: "Deploy triggered successfully",
+      timestamp: new Date().toISOString(),
+      response: result,
+    };
   },
 
   async listDeployments(skip: number = 0, take: number = 10) {

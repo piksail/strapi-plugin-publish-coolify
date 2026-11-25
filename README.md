@@ -21,6 +21,10 @@ COOLIFY_API_URL=https://your-coolify-instance.com/api/v1
 COOLIFY_APP_UUID=your_application_uuid
 ```
 
+The plugin triggers deployments with `POST /api/v1/deploy`, as required by
+current Coolify versions. Deployment errors are shown in the admin panel and
+logged by Strapi.
+
 ## Development
 
 ```bash

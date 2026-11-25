@@ -19,6 +19,7 @@ import { formatDate } from "../utils/date";
 import { getTranslation } from "../utils/getTranslation";
 import { Deployment, GetDeploymentsResponse } from "../types";
 import { getDeploymentStatusColor } from "../utils/getDeploymentStatusColor";
+import { getDeployErrorDetails } from "../utils/getDeployErrorDetails";
 
 const POLL_INTERVAL_MS = 30_000; // 30 seconds; adjust if needed
 
@@ -183,7 +184,8 @@ const HomePage = () => {
         "❌ " +
           formatMessage({ id: getTranslation("message.deploy.error") }) +
           ": " +
-          formatMessage({ id: getTranslation("message.deploy.unable") }),
+          (getDeployErrorDetails(error) ||
+            formatMessage({ id: getTranslation("message.deploy.unable") })),
       );
     } finally {
       setIsLoading(false);
